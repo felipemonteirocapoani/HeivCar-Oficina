@@ -1,0 +1,11 @@
+
+{
+  "name": "HeivCar Oficina",
+  "short_name": "HeivCar",
+  "description": "Sistema de gestão da HeivCar Oficina",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#111827"
+}
