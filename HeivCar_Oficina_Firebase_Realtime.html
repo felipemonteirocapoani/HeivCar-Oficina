@@ -1,0 +1,1213 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>HeivCar Oficina</title>
+<style>
+  /* Plano: preto no topo, degradê até o laranja #f37101 embaixo; texto branco; cartões escuros; acento laranja. */
+  :root{
+    color-scheme:dark;
+    --orange:#f37101; --white:#ffffff; --black:#0a0a0a;
+    --card:rgba(12,12,12,.84); --card-solid:#121212; --line:rgba(255,255,255,.10);
+    --field:#161616; --field-line:#2e2e2e;
+    --text:#ffffff; --muted:#b3b3b3; --dim:#6b6b6b;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    background:#0a0a0a;position:relative;isolation:isolate;
+    color:var(--text);font-family:var(--font);font-size:15px;-webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  /* Barra de luz no topo: a luz se espalha pelo preto, como uma lâmpada */
+  /* Feixe de luz branca que desce a partir da barra */
+  body::before{
+    content:"";position:fixed;left:50%;top:env(safe-area-inset-top,0px);transform:translateX(-50%);
+    width:min(72%,320px);height:78vh;z-index:-1;pointer-events:none;
+    background:linear-gradient(to bottom,rgba(255,255,255,.54) 0%,rgba(255,255,255,.24) 40%,rgba(255,255,255,.07) 72%,rgba(255,255,255,0) 100%);
+    filter:blur(34px);
+    animation:lampFlicker 5s ease-in-out infinite alternate;
+  }
+  /* Barra de luz branca, encostada no topo */
+  body::after{
+    content:"";position:fixed;top:env(safe-area-inset-top,0px);left:50%;transform:translateX(-50%);
+    width:min(70%,310px);height:3px;border-radius:0 0 999px 999px;z-index:-1;pointer-events:none;
+    background:#ffffff;
+    box-shadow:0 1px 12px #ffffff,0 2px 26px #ffffff,0 6px 48px rgba(255,255,255,.75);
+    filter:blur(.6px);
+    animation:lampFlicker 5s ease-in-out infinite alternate;
+  }
+  @keyframes lampFlicker{from{opacity:.95}to{opacity:1}}
+  /* Ao trocar de menu, a luz falha e volta, como lâmpada com defeito */
+  @keyframes lampBlink{
+    0%{opacity:1} 5%{opacity:.04} 10%{opacity:1} 17%{opacity:0} 22%{opacity:.9}
+    27%{opacity:0} 33%{opacity:1} 44%{opacity:.02} 49%{opacity:.7} 53%{opacity:.03} 58%{opacity:1} 100%{opacity:1}
+  }
+  body.flick::before,body.flick::after{animation:lampBlink 1.2s linear both}
+  @media (prefers-reduced-motion:reduce){body.flick::before,body.flick::after{animation:none}}
+  @media (prefers-reduced-motion:reduce){body::before,body::after{animation:none}}
+  button,input,select,textarea{font:inherit;color:inherit}
+  .app{
+    max-width:480px;margin:0 auto;overflow-x:hidden;
+    padding-block:22px 150px;
+    padding-left:max(16px,env(safe-area-inset-left,0px));
+    padding-right:max(16px,env(safe-area-inset-right,0px));
+  }
+
+  /* Marca */
+  .brand{text-align:center;padding:8px 0 22px}
+  .brand .logo{font-size:44px;line-height:1;font-weight:900;letter-spacing:-1px;color:var(--orange);text-shadow:0 0 14px rgba(243,113,1,.75),0 0 36px rgba(243,113,1,.4)}
+  .brand .logo .heiv{color:#fff;text-shadow:0 0 12px rgba(255,255,255,.55)}
+  .brand .logo-sub{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-top:10px;font-weight:700}
+
+  h1.title{font-size:30px;font-weight:800;margin:4px 0 16px;letter-spacing:-.6px}
+  .sec{font-size:17px;font-weight:800;margin:22px 0 10px}
+
+  /* Botões */
+  .btn{
+    border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px 16px;font-weight:700;font-size:15px;
+    cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;
+    background:#1b1b1b;color:var(--text);text-align:center;transition:transform .15s var(--ease),filter .2s;
+  }
+  .btn:hover{filter:brightness(1.1)}
+  .btn:active{transform:scale(.97)}
+  .btn.white{background:var(--white);color:#000;border-color:transparent}
+  .btn.orange{background:var(--orange);color:#fff;border-color:transparent}
+  .btn.red{background:rgba(255,69,58,.14);color:#ff8a82;border-color:rgba(255,69,58,.35)}
+  .btn.block{width:100%}
+  .btn.sm{padding:8px 14px;font-size:13px;border-radius:999px}
+  .icon-btn{background:#1b1b1b;border:1px solid rgba(255,255,255,.18);color:var(--text);width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--ease)}
+  .icon-btn:active{transform:scale(.92)}
+  .back{background:none;border:0;color:var(--white);font-size:14px;font-weight:700;cursor:pointer;padding:0 0 12px;opacity:.9}
+
+  /* Cartões e painéis */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;margin-top:12px}
+  .panel h3{font-size:16px;font-weight:800;margin:0}
+  .hint{font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px}
+  .note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:12px}
+  .empty{color:var(--muted);text-align:center;padding:26px 12px;font-size:14px;background:rgba(12,12,12,.7);border:1px dashed rgba(255,255,255,.18);border-radius:20px}
+
+  .stat-row{display:grid;grid-template-columns:repeat(2,1fr);background:var(--card);border:1px solid var(--line);border-radius:20px;margin-top:6px;overflow:hidden}
+  .stat-row > div{padding:14px 8px;text-align:center}
+  .stat-row > div + div{border-left:1px solid var(--line)}
+  .stat-row b{display:block;font-size:22px;font-weight:800;color:var(--orange)}
+  .stat-row span{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+
+  /* Calendário */
+  .cal{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:14px;margin-top:14px;overflow:hidden}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+  .cal-title{font-size:16px;font-weight:800;flex:1;text-align:center}
+  .wk,.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+  .wk div{text-align:center;padding:6px 0;font-size:11px;color:var(--muted);font-weight:700}
+  .cal-grid{border-top:1px solid var(--line);border-left:1px solid var(--line)}
+  .cell{border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-height:66px;padding:5px 3px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;cursor:pointer;min-width:0}
+  .cell:hover{background:rgba(255,255,255,.04)}
+  .cell.out .num{color:var(--dim)}
+  .num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+  .num.today{background:var(--orange);color:#fff}
+  .chip{font-weight:800;font-size:9px;border-radius:6px;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;color:#fff}
+  .chip.more{background:transparent;color:var(--muted);padding:0 2px}
+
+  /* Lista de serviços */
+  .list-head{font-size:16px;font-weight:800;margin:22px 0 10px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .lcard{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px 14px 24px;margin-bottom:10px;cursor:pointer;transition:transform .2s var(--ease),border-color .2s}
+  .lcard:hover{border-color:rgba(243,113,1,.5)}
+  .lcard:active{transform:scale(.985)}
+  .lcard .t{font-size:15px;font-weight:800}
+  .lcard .s{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+  .lcard .chev{font-size:22px;color:var(--white);opacity:.6}
+  .sbar{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:4px;height:56%;border-radius:999px}
+
+  .pill{font-size:11px;font-weight:800;padding:5px 10px;border-radius:999px;white-space:nowrap;color:#000}
+
+  /* Formulário */
+  .label{display:block;font-size:11px;font-weight:700;color:#cfcfcf;text-transform:uppercase;letter-spacing:.8px;margin:14px 0 7px}
+  .field{width:100%;background:var(--field);border:1px solid var(--field-line);color:var(--text);border-radius:14px;padding:14px;font-size:16px;outline:none;-webkit-appearance:none;appearance:none;min-width:0}
+  .field::placeholder{color:#6b6b6b}
+  .field:focus{border-color:var(--orange)}
+  /* Seletor no estilo do app */
+  .sel{position:relative}
+  .sel-btn{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--field);border:1px solid var(--field-line);color:var(--text);border-radius:14px;padding:14px;font-size:16px;cursor:pointer;text-align:left;transition:border-color .2s}
+  .sel-btn:focus-visible,.sel.open .sel-btn{border-color:var(--orange);outline:none}
+  .sel-val{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .sel-val.ph{color:#6b6b6b}
+  .sel-chev{width:8px;height:8px;border-right:2px solid #b3b3b3;border-bottom:2px solid #b3b3b3;transform:rotate(45deg) translateY(-2px);transition:transform .3s var(--ease);flex:0 0 8px}
+  .sel.open .sel-chev{transform:rotate(-135deg) translateY(0)}
+  .sel-panel{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .35s var(--ease),opacity .25s,margin .35s var(--ease)}
+  .sel.open .sel-panel{grid-template-rows:1fr;opacity:1;margin-top:8px}
+  .sel-panel > div{overflow:hidden;min-height:0}
+  .sel-list{background:#171717;border:1px solid var(--field-line);border-radius:16px;padding:6px;max-height:300px;overflow-y:auto}
+  .sel-opt{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;background:none;border:0;color:#d9d9d9;padding:12px;border-radius:12px;font-size:15px;cursor:pointer;text-align:left;transition:background .2s,color .2s}
+  .sel-opt:hover{background:#222}
+  .sel-opt.on{color:#fff;font-weight:700}
+  .sel-opt .ck{opacity:0;color:var(--orange);font-weight:800;transition:opacity .2s}
+  .sel-opt.on .ck{opacity:1}
+  .sel-search{margin-bottom:8px;padding:12px}
+  .sel-empty{color:var(--muted);font-size:13px;text-align:center;padding:14px 8px}
+  .sel-add{color:var(--orange);font-weight:700}
+  .sel-add .ck{opacity:1}
+
+  /* Seletor de horário estilo despertador */
+  .wheel{position:relative;display:grid;grid-template-columns:1fr 1fr;height:200px}
+  .wcol{height:200px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;-webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
+  .wcol::-webkit-scrollbar{display:none}
+  .wpad{height:80px}
+  .witem{height:40px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:22px;font-weight:700;color:#6b6b6b;font-variant-numeric:tabular-nums;transition:color .2s}
+  .witem.on{color:#fff}
+  .wband{position:absolute;left:8px;right:8px;top:80px;height:40px;border-top:1px solid rgba(243,113,1,.85);border-bottom:1px solid rgba(243,113,1,.85);background:rgba(243,113,1,.10);border-radius:8px;pointer-events:none}
+  textarea.field{resize:vertical;min-height:70px}
+  input[type=date],input[type=time]{color-scheme:dark}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .plate-row{display:grid;grid-template-columns:1fr;gap:12px}
+  .plate{letter-spacing:4px;font-weight:800;text-transform:uppercase;font-size:20px}
+  .msg{color:#ff8a82;font-size:13px;font-weight:600;min-height:20px;margin-top:12px}
+  .actions-form{display:grid;grid-template-columns:1.4fr 1fr;gap:10px;margin-top:20px}
+
+  /* Detalhe da ordem */
+  .ocard{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px}
+  .otop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .oplate{font-size:26px;font-weight:900;letter-spacing:3px;text-transform:uppercase}
+  .ovehicle{font-size:13px;color:var(--muted);margin-top:4px}
+  .ohr{height:1px;background:var(--line);margin:16px 0}
+  .info2{display:grid;grid-template-columns:1fr 1fr;gap:14px 12px}
+  .il{font-size:10px;letter-spacing:1px;color:var(--muted);font-weight:700;text-transform:uppercase}
+  .iv{font-size:15px;font-weight:800;margin-top:4px;overflow-wrap:anywhere}
+  .iv.sm{font-size:13px;font-weight:600;color:#e6e6e6;line-height:1.4}
+  .full{grid-column:1/-1}
+  .oactions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+  .oactions .wide{grid-column:1/-1}
+
+  /* Barra inferior */
+  .tabbar{position:fixed;left:0;right:0;bottom:0;background:rgba(10,10,10,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid #222;display:flex;justify-content:space-around;gap:4px;padding:10px max(8px,env(safe-area-inset-left,0px)) calc(12px + env(safe-area-inset-bottom,0px));z-index:5}
+  .tab{background:transparent;border:0;color:#bdbdbd;padding:9px 10px;border-radius:999px;font-weight:700;font-size:13px;display:flex;gap:6px;align-items:center;cursor:pointer;white-space:nowrap;transition:background .3s,color .3s,transform .15s}
+  .tab:active{transform:scale(.94)}
+  .tab .ic{font-size:14px}
+  .tab.on{background:var(--orange);color:#fff}
+
+  .toast{position:fixed;top:16px;left:50%;transform:translate(-50%,-14px);background:#fff;color:#000;padding:10px 18px;border-radius:999px;font-weight:700;font-size:14px;opacity:0;transition:opacity .3s,transform .35s var(--ease);pointer-events:none;z-index:9;white-space:nowrap}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .cfm{position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:10}
+  .cfm.show{opacity:1;pointer-events:auto}
+  .cfm-box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;width:min(100%,340px);transform:scale(.96);transition:transform .3s var(--ease)}
+  .cfm.show .cfm-box{transform:scale(1)}
+  .cfm-msg{font-size:15px;line-height:1.45;margin-bottom:16px;color:var(--text)}
+  .cfm-acts{display:flex;gap:8px}
+  .cfm-acts .btn{flex:1}
+
+  .view{display:none}
+  .view.on{display:block}
+  .view.enter-r{animation:inR .38s var(--ease) both}
+  .view.enter-l{animation:inL .38s var(--ease) both}
+  @keyframes inR{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+  @keyframes inL{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.view.enter-r,.view.enter-l{animation:none}}
+</style>
+
+<div class="app">
+
+  <header class="brand">
+    <div class="logo"><span class="heiv">HEIV</span>CAR</div>
+    <div class="logo-sub">Auto Elétrica</div>
+  </header>
+
+  <!-- AGENDA -->
+  <section class="view on" id="view-agenda">
+    <h1 class="title">Agenda</h1>
+    <button class="btn white block" data-go="novo">+ Agendar serviço</button>
+
+    <div class="stat-row" id="stats"></div>
+
+    <div class="cal">
+      <div class="cal-head">
+        <button class="icon-btn" data-cal="-1" aria-label="Mês anterior">‹</button>
+        <div class="cal-title" id="calTitle"></div>
+        <button class="btn sm" data-cal="0">Hoje</button>
+        <button class="icon-btn" data-cal="1" aria-label="Próximo mês">›</button>
+      </div>
+      <div class="wk"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <div id="dayList"></div>
+
+    <div class="list-head">Próximos serviços</div>
+    <div id="upcoming"></div>
+  </section>
+
+  <!-- NOVO / EDITAR SERVIÇO -->
+  <section class="view" id="view-novo">
+    <h1 class="title" id="formTitle">Agendar serviço</h1>
+    <form id="orderForm" autocomplete="off"></form>
+  </section>
+
+  <!-- ORDENS -->
+  <section class="view" id="view-ordens">
+    <h1 class="title" id="ordensTitle">Ordens</h1>
+    <div id="ordensArea"></div>
+  </section>
+
+  <!-- AJUSTES -->
+  <section class="view" id="view-ajustes">
+    <h1 class="title">Ajustes</h1>
+
+    <div class="panel">
+      <h3>Dados</h3>
+      <div style="display:grid;gap:10px;margin-top:14px">
+        <button class="btn" id="btnExport">Exportar agenda (JSON)</button>
+        <button class="btn" id="btnImport">Importar agenda (JSON)</button>
+        <button class="btn red" id="btnClear">Apagar toda a agenda</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+      <p class="note">A agenda é compartilhada pela nuvem após configurar o Firebase e entrar com uma conta autorizada. Catálogo e preferências auxiliares ainda podem ficar neste navegador.</p>
+    </div>
+  </section>
+</div>
+
+<nav class="tabbar">
+  <button class="tab on" data-go="agenda"><span class="ic">▦</span>Agenda</button>
+  <button class="tab" data-go="novo"><span class="ic">＋</span>Novo</button>
+  <button class="tab" data-go="ordens"><span class="ic">🔧</span>Ordens</button>
+  <button class="tab" data-go="ajustes"><span class="ic">⚙</span>Ajustes</button>
+</nav>
+
+<datalist id="mechs"></datalist>
+<div class="toast" id="toast"></div>
+<div class="cfm" id="cfm"><div class="cfm-box"><div class="cfm-msg" id="cfmMsg"></div><div class="cfm-acts"><button class="btn" id="cfmNo">Não</button><button class="btn red" id="cfmYes">Confirmar</button></div></div></div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getDatabase, ref, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+/* ==================== FIREBASE: CONFIGURE SEU PROJETO ==================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCVzdiTjpMQP4Aq_jRikby7f8YZCBUJujQ",
+  authDomain: "heivcar-agenda.firebaseapp.com",
+  databaseURL: "https://heivcar-agenda-default-rtdb.firebaseio.com/",
+  projectId: "heivcar-agenda",
+  storageBucket: "heivcar-agenda.firebasestorage.app",
+  messagingSenderId: "55189281337",
+  appId: "1:55189281337:web:e11e5178d5cb9a01bdcbe8",
+  measurementId: "G-TGQVMQ8KD4"
+};
+/* ==================== DADOS ==================== */
+
+const SERVICES = [
+  'Troca de óleo','Revisão geral','Freios','Suspensão','Alinhamento e balanceamento',
+  'Diagnóstico eletrônico','Elétrica','Ar-condicionado','Motor','Câmbio e embreagem','Pneus','Outro'
+];
+
+const STATUSES = {
+  agendado:  { label:'Agendado',  color:'#30d158', ink:'#000' },
+  cancelado: { label:'Cancelado', color:'#ff453a', ink:'#fff' }
+};
+
+const MONTHS_PT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+/* ==================== ESTADO ==================== */
+
+const STORE_KEY = 'heivcar.v1';
+let state = {
+  orders:[], shop:'HeivCar', mechanics:[],
+  view:'agenda', calMonth:null, selDate:null, dayFilter:null, ordemId:null, editId:null
+};
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){
+      const saved = JSON.parse(raw);
+      state.orders    = Array.isArray(saved.orders) ? saved.orders : [];
+      state.shop      = saved.shop || 'HeivCar';
+      state.mechanics = Array.isArray(saved.mechanics) ? saved.mechanics : [];
+    }
+  }catch(e){}
+  const n = new Date();
+  state.calMonth = [n.getFullYear(), n.getMonth()];
+}
+function saveState(){
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify({
+      shop:state.shop, mechanics:state.mechanics
+    }));
+  }catch(e){}
+}
+
+/* ==================== AGENDA COMPARTILHADA (FIREBASE) ==================== */
+let db = null;
+let auth = null;
+let sharedReady = false;
+let stopOrdersListener = null;
+let activeUserId = null;
+const ordersRef = () => ref(db, "orders");
+const firebaseConfigured = () =>
+  FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId === "heivcar-agenda" &&
+  FIREBASE_CONFIG.databaseURL && FIREBASE_CONFIG.databaseURL.startsWith("https://") &&
+  !FIREBASE_CONFIG.databaseURL.includes("COLE_AQUI");
+
+function rerenderCurrent(){
+  if(state.view === 'agenda') renderAgenda();
+  if(state.view === 'ordens') renderOrdens();
+}
+async function storeSave(o){
+  if(!db || !sharedReady){ toast('Entre na conta para salvar na agenda compartilhada'); return false; }
+  const { id, ...body } = o;
+  try { await set(ref(db, `orders/${id}`), body); return true; }
+  catch(e){ console.error(e); toast('Não foi possível salvar. Verifique a conexão e as permissões.'); return false; }
+}
+async function storeUpdate(id, patch){
+  if(!db || !sharedReady){ toast('Entre na conta para atualizar'); return false; }
+  try { await update(ref(db, `orders/${id}`), patch); return true; }
+  catch(e){ console.error(e); toast('Não foi possível atualizar. Verifique as permissões.'); return false; }
+}
+async function storeRemove(id){
+  if(!db || !sharedReady){ toast('Entre na conta para excluir'); return false; }
+  try { await remove(ref(db, `orders/${id}`)); return true; }
+  catch(e){ console.error(e); toast('Não foi possível excluir. Verifique as permissões.'); return false; }
+}
+
+function showCloudLogin(message='A agenda compartilhada precisa de conexão com o Firebase.'){
+  let panel = document.getElementById('cloudLogin');
+  if(!panel){
+    panel = document.createElement('div'); panel.id='cloudLogin';
+    panel.style.cssText='position:fixed;inset:0;z-index:99999;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;padding:22px;font:14px -apple-system,BlinkMacSystemFont,sans-serif';
+    panel.innerHTML=`<form id="cloudLoginForm" style="width:100%;max-width:380px;background:#202020;border:1px solid #444;border-radius:18px;padding:24px;box-sizing:border-box"><h2 style="margin:0 0 8px;color:#f37101">HeivCar Oficina</h2><p id="cloudLoginMsg" style="line-height:1.5;color:#ddd"></p><label style="display:block;margin:14px 0 6px">E-mail autorizado</label><input id="cloudEmail" type="email" autocomplete="username" required style="width:100%;box-sizing:border-box;padding:13px;border-radius:9px;border:1px solid #555;background:#111;color:white"><label style="display:block;margin:14px 0 6px">Senha</label><input id="cloudPassword" type="password" autocomplete="current-password" required style="width:100%;box-sizing:border-box;padding:13px;border-radius:9px;border:1px solid #555;background:#111;color:white"><button type="submit" style="width:100%;margin-top:18px;padding:13px;border:0;border-radius:9px;background:#f37101;color:#111;font-weight:700">Entrar na agenda compartilhada</button><p style="font-size:12px;line-height:1.5;color:#aaa">Use uma conta autorizada. Não compartilhe a senha com pessoas não autorizadas.</p></form>`;
+    document.body.appendChild(panel);
+    document.getElementById('cloudLoginForm').addEventListener('submit', async ev=>{
+      ev.preventDefault();
+      const btn=ev.currentTarget.querySelector('button'); btn.disabled=true; btn.textContent='Conectando…';
+      try {
+        await signInWithEmailAndPassword(auth, document.getElementById('cloudEmail').value.trim(), document.getElementById('cloudPassword').value);
+      } catch(e) {
+        console.error(e);
+        document.getElementById('cloudLoginMsg').textContent='Falha no login. Confira e-mail e senha, e confirme que a conta foi criada no Firebase Authentication.';
+      } finally { btn.disabled=false; btn.textContent='Entrar na agenda compartilhada'; }
+    });
+  }
+  document.getElementById('cloudLoginMsg').textContent=message;
+}
+
+async function startAgenda(){
+  let legacyOrders = [];
+  try {
+    const previous = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    if(previous && Array.isArray(previous.orders)) legacyOrders = previous.orders;
+  } catch(e) {}
+  if(!firebaseConfigured()){
+    showCloudLogin('Preencha databaseURL com a URL exata exibida em Firebase Console → Realtime Database. A agenda não será salva localmente como se estivesse compartilhada.');
+    return;
+  }
+  try {
+    const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
+    auth = getAuth(app);
+    db = getDatabase(app, FIREBASE_CONFIG.databaseURL);
+    onAuthStateChanged(auth, user => {
+      sharedReady = !!user;
+      activeUserId = user?.uid || null;
+      if(stopOrdersListener){ stopOrdersListener(); stopOrdersListener=null; }
+      if(!user){
+        state.orders=[];
+        rerenderCurrent();
+        showCloudLogin('Entre com uma conta autorizada para acessar a agenda da oficina.');
+        return;
+      }
+      const panel=document.getElementById('cloudLogin'); if(panel) panel.remove();
+      stopOrdersListener = onValue(ordersRef(), async snap => {
+        const data = snap.val() || {};
+        state.orders = Object.entries(data)
+          .filter(([id, value]) => value && typeof value === 'object')
+          .map(([id, value]) => ({...value, id}));
+        if(legacyOrders.length) {
+          const known = new Set(state.orders.map(o => o.id));
+          const missing = legacyOrders.filter(o => o && typeof o.id === 'string' && !known.has(o.id));
+          try {
+            for(const o of missing) {
+              const {id, ...body} = o;
+              await set(ref(db, `orders/${id}`), body);
+            }
+            legacyOrders = [];
+          } catch(e) {
+            console.error(e);
+            toast('Não foi possível importar alguns agendamentos antigos');
+          }
+        }
+        saveState();
+        rerenderCurrent();
+      }, error => {
+        console.error(error);
+        sharedReady=false;
+        toast('Agenda indisponível. Confira a URL e as regras do Realtime Database.');
+      });
+      rerenderCurrent();
+    }, error => {
+      console.error(error);
+      sharedReady=false;
+      showCloudLogin('Não foi possível verificar a conta. Confira a configuração do Firebase Authentication.');
+    });
+  } catch(e) {
+    console.error(e);
+    showCloudLogin('Não foi possível conectar. Confira a configuração e a URL do Realtime Database.');
+  }
+}
+
+/* ==================== UTILITÁRIOS ==================== */
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+
+let cfmAction = null;
+function askConfirm(msg, onYes){
+  $('#cfmMsg').textContent = msg; cfmAction = onYes; $('#cfm').classList.add('show');
+}
+function closeConfirm(){ $('#cfm').classList.remove('show'); cfmAction = null; }
+$('#cfmNo').addEventListener('click', closeConfirm);
+$('#cfm').addEventListener('click', e => { if(e.target.id === 'cfm') closeConfirm(); });
+$('#cfmYes').addEventListener('click', () => { const fn = cfmAction; closeConfirm(); if(fn) fn(); });
+
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2000);
+}
+function todayStr(){
+  const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function fmtDateBR(str){ const [y,m,d] = str.split('-'); return `${d}/${m}/${y}`; }
+function sortedOrders(){
+  return [...state.orders].sort((a,b) => (a.date + a.time).localeCompare(b.date + b.time));
+}
+function orderCard(o){
+  const st = STATUSES[o.status] || STATUSES.agendado;
+  return `
+    <div class="lcard" data-order="${o.id}">
+      <span class="sbar" style="background:${st.color}"></span>
+      <div style="min-width:0">
+        <div class="t">${esc(o.client)}</div>
+        <div class="s">${esc(o.service)} · ${fmtDateBR(o.date)} · ${esc(o.time)}</div>
+      </div>
+      <span class="chev">›</span>
+    </div>`;
+}
+
+/* ==================== AGENDA ==================== */
+
+function renderStats(){
+  const c = { agendado:0, cancelado:0 };
+  state.orders.forEach(o => { if(c[o.status] !== undefined) c[o.status]++; });
+  $('#stats').innerHTML = `
+    <div><b>${c.agendado}</b><span>Agendados</span></div>
+    <div><b>${c.cancelado}</b><span>Cancelados</span></div>`;
+}
+
+function renderCalendar(){
+  const [y, m] = state.calMonth;
+  $('#calTitle').textContent = `${MONTHS_PT[m]} de ${y}`;
+  const first = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const prevDays = new Date(y, m, 0).getDate();
+
+  const byDay = {};
+  state.orders.forEach(o => { (byDay[o.date] = byDay[o.date] || []).push(o); });
+
+  const cells = [];
+  for(let i=0;i<first;i++) cells.push({ dt:new Date(y, m-1, prevDays-first+1+i), out:true });
+  for(let d=1; d<=daysInMonth; d++) cells.push({ dt:new Date(y, m, d), out:false });
+  while(cells.length < 35 || cells.length % 7 !== 0){
+    const last = cells[cells.length-1].dt;
+    cells.push({ dt:new Date(last.getFullYear(), last.getMonth(), last.getDate()+1), out:true });
+  }
+
+  const today = todayStr();
+  $('#calGrid').innerHTML = cells.map(({dt,out}) => {
+    const key = `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+    const list = (byDay[key] || []).sort((a,b) => a.time.localeCompare(b.time));
+    const chips = list.slice(0,2).map(o => {
+      const st = STATUSES[o.status] || STATUSES.agendado;
+      return `<div class="chip" style="background:${st.color};color:${st.ink}">${esc((o.client || '').split(' ')[0])}</div>`;
+    }).join('') + (list.length > 2 ? `<div class="chip more">+${list.length-2}</div>` : '');
+    const cls = ['cell', out ? 'out' : '', key === state.selDate ? 'sel' : ''].join(' ');
+    const numCls = ['num', key === today ? 'today' : ''].join(' ');
+    return `<div class="${cls}" data-day="${key}"><span class="${numCls}">${dt.getDate()}</span>${chips}</div>`;
+  }).join('');
+}
+
+function renderAgenda(){
+  renderStats();
+  renderCalendar();
+
+  $('#dayList').innerHTML = '';
+
+  const today = todayStr();
+  const up = sortedOrders().filter(o => o.date >= today && o.status !== 'concluido' && o.status !== 'cancelado');
+  $('#upcoming').innerHTML = up.length
+    ? up.map(orderCard).join('')
+    : '<div class="empty">Nenhum serviço agendado. Toque em “+ Agendar serviço”.</div>';
+}
+
+/* ==================== FORMULÁRIO ==================== */
+
+function renderForm(o, presetDate){
+  const isEdit = !!o;
+  const d = o || { client:'', phone:'', plate:'', vehicle:'', service:'', mechanic:'', date: presetDate || '', time:'', notes:'' };
+  $('#formTitle').textContent = isEdit ? 'Editar serviço' : 'Agendar serviço';
+
+  $('#orderForm').innerHTML = `
+    <div class="panel">
+      <h3>Cliente e veículo</h3>
+      <span class="label">Nome do cliente</span>
+      <input class="field" id="f_client" placeholder="Nome completo" value="${esc(d.client)}">
+      <span class="label">Telefone (opcional)</span>
+      <input class="field" id="f_phone" inputmode="tel" placeholder="(00) 00000-0000" value="${esc(d.phone)}">
+      <span class="label">Marca</span>
+      ${searchSelectHtml('f_brand', 'brand', d.brand, 'Toque para escolher ou digitar')}
+      <span class="label">Modelo</span>
+      ${searchSelectHtml('f_model', 'model', d.model, d.brand ? 'Toque para escolher ou digitar' : 'Escolha a marca primeiro')}
+      <span class="label">Ano</span>
+      ${selectHtml('f_year', YEARS.map(y => ({ v:String(y), l:String(y) })), String(d.year || ''), 'Selecione o ano')}
+    </div>
+
+    <div class="panel">
+      <h3>Serviço</h3>
+      <span class="label">Tipo de serviço</span>
+      ${selectHtml('f_service', SERVICES.map(s => ({ v:s, l:s })), d.service, 'Selecione o serviço')}
+      <span class="label">Mecânico responsável</span>
+      <span class="label">Data</span>
+      <input class="field" id="f_date" type="date" value="${esc(d.date)}">
+      <span class="label">Horário</span>
+      ${wheelHtml('f_time', d.time)}
+      <span class="label">Observação</span>
+      <textarea class="field" id="f_notes" rows="3" placeholder="Detalhes do serviço (opcional)">${esc(d.notes)}</textarea>
+    </div>
+
+    <div class="msg" id="formMsg"></div>
+    <div class="actions-form">
+      <button class="btn orange" type="submit">${isEdit ? 'Salvar alterações' : 'Concluir agendamento'}</button>
+      <button class="btn" type="button" id="btnCancelForm">Cancelar</button>
+    </div>`;
+
+  renderSearchList('f_brand');
+  renderSearchList('f_model');
+  initWheel('f_time');
+
+  // Placa removida do formulário
+  $('#btnCancelForm').onclick = () => { state.editId = null; setView(isEdit ? 'ordens' : 'agenda'); };
+  $('#orderForm').onsubmit = ev => { ev.preventDefault(); saveOrder(); };
+}
+
+/* ==================== TELEFONE E HORÁRIO ==================== */
+
+// Formata como (xx) xxxxx-xxxx (ou (xx) xxxx-xxxx para fixos)
+function formatPhone(raw){
+  const d = String(raw ?? '').replace(/\D/g,'').slice(0,11);
+  if(!d) return '';
+  if(d.length <= 2) return `(${d}`;
+  const split = d.length > 10 ? 7 : 6;
+  const a = d.slice(2, split), b = d.slice(split);
+  return `(${d.slice(0,2)}) ${a}${b ? '-' + b : ''}`;
+}
+
+// Seletor de horário em rodinhas (hora e minuto), estilo despertador
+const WHEEL_H = 40;
+function wheelHtml(id, value){
+  const hasVal = !!value;
+  const col = (name, count) => `
+    <div class="wcol" data-wheel="${name}">
+      <div class="wpad"></div>
+      ${Array.from({length:count}, (_,i) => `<div class="witem">${pad(i)}</div>`).join('')}
+      <div class="wpad"></div>
+    </div>`;
+  return `
+  <div class="sel" id="w_${id}" data-kind="wheel" data-target="${id}">
+    <button type="button" class="sel-btn" data-toggle="${id}">
+      <span class="sel-val ${hasVal ? '' : 'ph'}">${esc(hasVal ? value : 'Selecione o horário')}</span>
+      <span class="sel-chev"></span>
+    </button>
+    <div class="sel-panel"><div>
+      <div class="wheel">
+        <div class="wband"></div>
+        ${col('h', 24)}${col('m', 60)}
+      </div>
+    </div></div>
+    <input type="hidden" id="${id}" value="${esc(value || '')}">
+  </div>`;
+}
+
+function refreshWheelLabel(id){
+  const w = document.getElementById('w_' + id);
+  const v = document.getElementById(id).value;
+  const lab = w.querySelector('.sel-val');
+  lab.textContent = v || 'Selecione o horário';
+  lab.classList.toggle('ph', !v);
+}
+function updateWheelItems(col, idx){
+  col.querySelectorAll('.witem').forEach((el,i) => el.classList.toggle('on', i === idx));
+}
+// Posiciona as rodinhas no valor atual; sem valor, começa em 09:00
+function initWheel(id){
+  const w = document.getElementById('w_' + id); if(!w) return;
+  const hidden = document.getElementById(id);
+  if(!hidden.value) hidden.value = '09:00';
+  const [h, m] = hidden.value.split(':').map(Number);
+  const hC = w.querySelector('[data-wheel="h"]'), mC = w.querySelector('[data-wheel="m"]');
+  hC.scrollTop = h * WHEEL_H; mC.scrollTop = m * WHEEL_H;
+  hC.dataset.idx = h; mC.dataset.idx = m;
+  updateWheelItems(hC, h); updateWheelItems(mC, m);
+  refreshWheelLabel(id);
+}
+/* ---------- Som e vibração ---------- */
+
+// O contexto de áudio é criado no primeiro toque, como exigem os navegadores
+let audioCtx = null;
+function getAudio(){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }catch(e){ return null; }
+}
+document.addEventListener('pointerdown', () => { getAudio(); }, { once:true });
+
+function haptic(ms){
+  try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){}
+}
+
+// Clique curto e seco a cada posição da rodinha
+function playTick(){
+  const ac = getAudio(); if(!ac) return;
+  const t = ac.currentTime;
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(1900, t);
+  o.frequency.exponentialRampToValueAtTime(1200, t + 0.03);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.07, t + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.035);
+  o.connect(g).connect(ac.destination);
+  o.start(t); o.stop(t + 0.06);
+}
+
+// "pam" grave e baixinho, depois "pam" agudo e mais forte, com harmônicos de sino
+function playChime(){
+  const ac = getAudio(); if(!ac) return;
+  const t0 = ac.currentTime;
+  [[659.25, 0, 0.09], [987.77, 0.26, 0.26]].forEach(([freq, delay, vol]) => {
+    const t = t0 + delay;
+    [[1, vol, 1.4], [2.01, vol*0.3, 0.8], [3.0, vol*0.08, 0.45]].forEach(([mult, peak, decay]) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq * mult;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(peak, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+      o.connect(g).connect(ac.destination);
+      o.start(t); o.stop(t + decay + 0.05);
+    });
+  });
+}
+
+document.addEventListener('scroll', e => {
+  const col = e.target;
+  if(!col.dataset || !col.dataset.wheel) return;
+  const wrap = col.closest('.sel'); const id = wrap.dataset.target;
+  const hC = wrap.querySelector('[data-wheel="h"]'), mC = wrap.querySelector('[data-wheel="m"]');
+
+  // Vibra e faz o clique quando a rodinha muda de posição
+  const max = col.dataset.wheel === 'h' ? 23 : 59;
+  const idx = Math.min(max, Math.max(0, Math.round(col.scrollTop / WHEEL_H)));
+  if(String(idx) !== col.dataset.idx){
+    col.dataset.idx = String(idx);
+    playTick();
+    haptic(18);
+  }
+
+  const hi = Math.min(23, Math.max(0, Math.round(hC.scrollTop / WHEEL_H)));
+  const mi = Math.min(59, Math.max(0, Math.round(mC.scrollTop / WHEEL_H)));
+  updateWheelItems(hC, hi); updateWheelItems(mC, mi);
+  document.getElementById(id).value = `${pad(hi)}:${pad(mi)}`;
+  refreshWheelLabel(id);
+}, true);
+
+/* ==================== CATÁLOGO DE VEÍCULOS ==================== */
+
+// Lista de apoio com marcas e modelos comuns no Brasil. Marcas e modelos novos são cadastrados pela própria oficina.
+const BRANDS = {
+  'Audi':        ['A3','A4','A5','Q3','Q5'],
+  'BMW':         ['Série 1','320i','X1','X3','X5'],
+  'BYD':         ['Dolphin','Yuan Plus','Song','Tan','Han'],
+  'Caoa Chery':  ['Tiggo 2','Tiggo 5x','Tiggo 7','Tiggo 8','Arrizo 6'],
+  'Chevrolet':   ['Onix','Prisma','Cruze','Tracker','S10','Spin','Montana','Celta','Corsa','Classic','Cobalt','Joy','Captiva','Equinox','Silverado','Bolt','Camaro'],
+  'Citroën':     ['C3','C4 Cactus','C4 Lounge','Aircross','Jumpy','Jumper','Berlingo','C5 Aircross'],
+  'Fiat':        ['Argo','Cronos','Mobi','Uno','Strada','Toro','Fiorino','Ducato','Pulse','Fastback','Siena','Palio','Punto','Bravo','Doblo','Idea','Grand Siena','Linea','Freemont'],
+  'Ford':        ['Ka','Fiesta','Focus','EcoSport','Ranger','Territory','Maverick','Fusion','Courier','Transit','Mustang','Edge'],
+  'Honda':       ['Civic','City','Fit','HR-V','WR-V','CR-V','Accord'],
+  'Hyundai':     ['HB20','HB20S','Creta','Tucson','Santa Fe','IX35','Elantra','i30','Azera','HR','Veloster'],
+  'Jeep':        ['Renegade','Compass','Commander','Wrangler','Grand Cherokee','Cherokee'],
+  'Kia':         ['Sportage','Cerato','Soul','Stonic','Sorento','Carnival','Picanto','Niro','Bongo'],
+  'Land Rover':  ['Defender','Discovery','Range Rover Evoque'],
+  'Mercedes-Benz': ['Classe A','Classe C','Classe E','GLA','GLC','Sprinter'],
+  'Mitsubishi':  ['L200 Triton','Pajero Sport','Pajero Full','ASX','Eclipse Cross','Outlander','Lancer'],
+  'Nissan':      ['Kicks','Versa','Sentra','Frontier','March','Livina','Tiida','X-Trail','Leaf'],
+  'Peugeot':     ['208','2008','3008','308','408','207','306','307','Partner','Expert','Boxer'],
+  'RAM':         ['1500','2500','3500','Rampage'],
+  'Renault':     ['Kwid','Sandero','Logan','Duster','Captur','Oroch','Master','Clio','Megane','Fluence','Symbol'],
+  'Subaru':      ['Impreza','XV','Forester','Outback'],
+  'Suzuki':      ['Jimny','Vitara','S-Cross','Swift'],
+  'Toyota':      ['Corolla','Corolla Cross','Yaris','Hilux','SW4','RAV4','Etios','Camry','Prius','Fortuner','Bandeirante'],
+  'Volkswagen':  ['Gol','Polo','Virtus','Saveiro','Voyage','Up!','T-Cross','Nivus','Taos','Amarok','Jetta','Fox','Golf','Tiguan','Passat','Santana','Kombi','Ameo'],
+  'Volvo':       ['XC40','XC60','XC90']
+};
+const YEARS = [];
+for(let y = 2027; y >= 1960; y--) YEARS.push(y);
+
+const CAT_KEY = 'heivcar.catalog.v1';
+let catalog = { brands:[], models:{} };
+
+function loadCatalog(){
+  try{
+    const c = JSON.parse(localStorage.getItem(CAT_KEY) || 'null');
+    if(c) catalog = { brands: c.brands || [], models: c.models || {} };
+  }catch(e){}
+}
+function saveCatalog(){
+  try{ localStorage.setItem(CAT_KEY, JSON.stringify(catalog)); }catch(e){}
+}
+
+// Compara sem diferença de maiúsculas e acentos (FIAT = Fiat)
+const norm = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+
+function uniqSort(arr){
+  const seen = new Set(), out = [];
+  arr.forEach(x => { const k = norm(x); if(x && !seen.has(k)){ seen.add(k); out.push(x); } });
+  return out.sort((a,b) => a.localeCompare(b,'pt-BR'));
+}
+function getBrands(){ return uniqSort([...Object.keys(BRANDS), ...catalog.brands]); }
+function getModels(brand){
+  if(!brand) return [];
+  return uniqSort([...(BRANDS[brand] || []), ...(catalog.models[brand] || [])]);
+}
+
+// Campo com botão que abre um campo de busca: a lista mostra as marcas ou modelos que batem com o texto
+function searchSelectHtml(id, kind, value, placeholder){
+  const cur = value || '';
+  return `
+  <div class="sel" id="w_${id}" data-kind="${kind}">
+    <button type="button" class="sel-btn" data-toggle="${id}">
+      <span class="sel-val ${cur ? '' : 'ph'}">${esc(cur || placeholder)}</span>
+      <span class="sel-chev"></span>
+    </button>
+    <div class="sel-panel"><div>
+      <input class="field sel-search" id="s_${id}" data-search="${id}" autocomplete="off"
+        placeholder="${kind === 'brand' ? 'Digite a marca, ex.: FIAT' : 'Digite o modelo, ex.: Uno'}">
+      <div class="sel-list" id="l_${id}"></div>
+    </div></div>
+    <input type="hidden" id="${id}" value="${esc(cur)}">
+  </div>`;
+}
+
+function renderSearchList(id){
+  const w = document.getElementById('w_' + id); if(!w) return;
+  const kind = w.dataset.kind;
+  const rawQ = document.getElementById('s_' + id).value.trim();
+  const q = norm(rawQ);
+  const cur = document.getElementById(id).value;
+  const list = document.getElementById('l_' + id);
+
+  let opts, brand = '';
+  if(kind === 'brand'){
+    opts = getBrands();
+  } else {
+    brand = document.getElementById('f_brand').value;
+    if(!brand){ list.innerHTML = '<div class="sel-empty">Escolha a marca primeiro.</div>'; return; }
+    opts = getModels(brand);
+  }
+
+  const matches = q ? opts.filter(x => norm(x).includes(q)) : opts;
+  const exact = q && opts.some(x => norm(x) === q);
+
+  let html = matches.map(x => `
+    <button type="button" class="sel-opt ${x === cur ? 'on' : ''}" data-pick="${id}" data-val="${esc(x)}" data-label="${esc(x)}">
+      <span>${esc(x)}</span><span class="ck">✓</span>
+    </button>`).join('');
+
+  if(q && !exact){
+    html += `
+    <button type="button" class="sel-opt sel-add" data-add="${kind}" data-target="${id}" data-val="${esc(rawQ)}">
+      <span>Cadastrar “${esc(rawQ)}”${kind === 'model' ? ' para ' + esc(brand) : ''}</span><span class="ck">+</span>
+    </button>`;
+  }
+  list.innerHTML = html || '<div class="sel-empty">Digite para buscar ou cadastrar.</div>';
+}
+
+// Ao trocar a marca, o modelo anterior deixa de valer
+function resetModel(){
+  document.getElementById('f_model').value = '';
+  document.getElementById('s_f_model').value = '';
+  const lab = document.getElementById('w_f_model').querySelector('.sel-val');
+  lab.textContent = document.getElementById('f_brand').value ? 'Toque para escolher ou digitar' : 'Escolha a marca primeiro';
+  lab.classList.add('ph');
+  renderSearchList('f_model');
+}
+
+/* Seletor no estilo do app (abre como lista expansível, sem o menu nativo do sistema) */
+function selectHtml(id, options, value, placeholder){
+  const cur = options.find(o => o.v === value);
+  return `
+  <div class="sel" id="w_${id}">
+    <button type="button" class="sel-btn" data-toggle="${id}">
+      <span class="sel-val ${cur ? '' : 'ph'}">${esc(cur ? cur.l : placeholder)}</span>
+      <span class="sel-chev"></span>
+    </button>
+    <div class="sel-panel"><div>
+      <div class="sel-list">
+        ${options.map(o => `
+        <button type="button" class="sel-opt ${o.v === value ? 'on' : ''}" data-pick="${id}" data-val="${esc(o.v)}" data-label="${esc(o.l)}">
+          <span>${esc(o.l)}</span><span class="ck">✓</span>
+        </button>`).join('')}
+      </div>
+    </div></div>
+    <input type="hidden" id="${id}" value="${esc(value ?? '')}">
+  </div>`;
+}
+
+function readForm(){
+  const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  return {
+    client:g('f_client'), phone:g('f_phone'),
+    brand:g('f_brand'), model:g('f_model'), year:g('f_year'),
+    vehicle:[g('f_brand'), g('f_model'), g('f_year')].filter(Boolean).join(' '),
+    service:g('f_service'), mechanic:g('f_mech'),
+    date:g('f_date'), time:g('f_time'), notes:g('f_notes')
+  };
+}
+
+function validate(f){
+  if(!f.client) return 'Informe o nome do cliente.';
+  if(!f.brand) return 'Selecione a marca do veículo.';
+  if(!f.model) return 'Selecione o modelo do veículo.';
+  if(!f.year) return 'Selecione o ano do veículo.';
+  if(!SERVICES.includes(f.service)) return 'Selecione o tipo de serviço.';
+  if(!f.date || !f.time) return 'Informe a data e o horário.';
+  return null;
+}
+
+async function saveOrder(){
+  if(!sharedReady){ toast('Conecte-se à agenda compartilhada antes de salvar'); return; }
+  const f = readForm();
+  const err = validate(f);
+  if(err){ $('#formMsg').textContent = err; return; }
+
+  if(f.mechanic && !state.mechanics.includes(f.mechanic)){
+    state.mechanics.push(f.mechanic);
+  }
+
+  if(state.editId){
+    const old = state.orders.find(x => x.id === state.editId) || {};
+    const ok = await storeSave({ ...old, ...f, id: state.editId });
+    if(!ok) return;
+    state.ordemId = state.editId;
+    toast('Serviço atualizado');
+  } else {
+    const id = uid();
+    const ok = await storeSave({ id, ...f, status:'agendado', createdAt:Date.now() });
+    if(!ok) return;
+    playChime();
+    haptic([15, 60, 15]);
+    state.ordemId = id;
+    state.selDate = f.date;
+    toast('Serviço agendado');
+  }
+  state.editId = null;
+  saveState();
+  setView('ordens');
+}
+
+/* ==================== ORDENS ==================== */
+
+function renderOrdens(){
+  const area = $('#ordensArea');
+  const o = state.ordemId ? state.orders.find(x => x.id === state.ordemId) : null;
+  const day = state.dayFilter;
+  $('#ordensTitle').textContent = day && !o ? `Ordens de ${fmtDateBR(day)}` : 'Ordens';
+
+  if(!o){
+    if(day){
+      const items = sortedOrders().filter(x => x.date === day);
+      area.innerHTML = `
+        <button class="back" data-clearday="1">‹ Todas as ordens</button>
+        <button class="btn white block" data-newday="${day}" style="margin-bottom:12px">+ Agendar neste dia</button>
+        ${items.length ? items.map(orderCard).join('') : '<div class="empty">Nenhum serviço neste dia.</div>'}`;
+      return;
+    }
+    const list = sortedOrders();
+    area.innerHTML = list.length
+      ? list.map(orderCard).join('')
+      : '<div class="empty">Nenhum serviço cadastrado. Toque em “+ Agendar serviço”.</div>';
+    return;
+  }
+
+  const st = STATUSES[o.status] || STATUSES.agendado;
+  area.innerHTML = `
+    <button class="back" data-back="ordens">‹ Voltar</button>
+    <div class="ocard">
+      <div class="otop">
+        <div style="min-width:0">
+          <div class="oplate">${esc(o.client)}</div>
+          <div class="ovehicle">${esc(o.vehicle)}</div>
+        </div>
+        <span class="pill" style="background:${st.color};color:${st.ink}">${st.label}</span>
+      </div>
+      <div class="ohr"></div>
+      <div class="info2">
+        <div class="full"><div class="il">Serviço</div><div class="iv">${esc(o.service)}</div></div>
+        <div><div class="il">Telefone</div><div class="iv sm">${esc(o.phone || '—')}</div></div>
+        <div><div class="il">Data</div><div class="iv">${fmtDateBR(o.date)}</div></div>
+        <div><div class="il">Horário</div><div class="iv">${esc(o.time)}</div></div>
+        ${o.notes ? `<div class="full"><div class="il">Observação</div><div class="iv sm">${esc(o.notes)}</div></div>` : ''}
+      </div>
+
+      <div class="oactions">
+        <button class="btn" data-edit="${o.id}">✎ Editar</button>
+        ${o.status === 'cancelado'
+          ? `<button class="btn orange" data-reopen="${o.id}">Reabrir</button>
+             <button class="btn red wide" data-delete="${o.id}">Excluir</button>`
+          : `<button class="btn red" data-cancel="${o.id}">Cancelar</button>`}
+      </div>
+    </div>`;
+}
+
+async function setStatus(id, status){
+  const ok = await storeUpdate(id, { status });
+  if(ok) toast(`Status: ${STATUSES[status].label}`);
+}
+function cancelOrder(id){
+  const o = state.orders.find(x => x.id === id); if(!o) return;
+  askConfirm('Cancelar este serviço? Ele continuará na lista marcado como cancelado.', async () => {
+    const ok = await storeUpdate(id, { status:'cancelado' });
+    if(ok) toast('Serviço cancelado');
+  });
+}
+function deleteOrder(id){
+  askConfirm('Excluir este serviço? Esta ação não pode ser desfeita.', async () => {
+    const ok = await storeRemove(id);
+    if(!ok) return;
+    if(state.ordemId === id) state.ordemId = null;
+    toast('Serviço excluído');
+  });
+}
+function editOrder(id){
+  const o = state.orders.find(x => x.id === id); if(!o) return;
+  state.editId = id;
+  setView('novo', o);
+}
+
+/* ==================== AJUSTES ==================== */
+
+function renderAjustes(){}
+
+async function importAgenda(file){
+  try {
+    const txt = await file.text();
+    let arr;
+    try{ arr = JSON.parse(txt); }catch(e){ toast('Arquivo inválido'); return; }
+    if(!Array.isArray(arr)){ toast('Arquivo inválido'); return; }
+    const ids = new Set(state.orders.map(o => o.id));
+    let added = 0;
+    for(const o of arr) {
+      if(o && typeof o.id === 'string' && !ids.has(o.id) && o.client && o.date && o.time){
+        if(await storeSave(o)) { ids.add(o.id); added++; }
+      }
+    }
+    saveState(); renderAgenda();
+    toast(added ? `${added} serviço(s) importado(s)` : 'Nenhum serviço novo no arquivo');
+  } catch(e) { toast('Não foi possível ler o arquivo'); }
+}
+
+function exportAgenda(){
+  const blob = new Blob([JSON.stringify(state.orders, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'heivcar-agenda.json'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function clearAll(){
+  if(!sharedReady){ toast('Conecte-se à agenda compartilhada antes de apagar'); return; }
+  askConfirm('Apagar toda a agenda?', async () => {
+    const results = await Promise.all([...state.orders].map(x => storeRemove(x.id)));
+    if(results.some(ok => !ok)) { toast('Alguns serviços não puderam ser excluídos'); return; }
+    state.selDate = null; state.ordemId = null;
+    saveState(); setView('agenda'); toast('Agenda apagada');
+  });
+}
+
+/* ==================== NAVEGAÇÃO ==================== */
+
+function setView(view, data){
+  const ORDER = ['agenda','novo','ordens','ajustes'];
+  const prev = state.view;
+  state.view = view;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.go === view));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on','enter-r','enter-l'));
+  const el = $('#view-' + view);
+  el.classList.add('on');
+  // Transição lateral: avança para a direita, volta para a esquerda
+  if(prev !== view){
+    void el.offsetWidth;
+    el.classList.add(ORDER.indexOf(view) >= ORDER.indexOf(prev) ? 'enter-r' : 'enter-l');
+    // Piscada da light bar a cada troca de menu
+    document.body.classList.remove('flick');
+    void document.body.offsetWidth;
+    // Acontece em cerca de 65% das trocas de menu
+    if(Math.random() < 0.65) document.body.classList.add('flick');
+    clearTimeout(setView._flick);
+    setView._flick = setTimeout(() => document.body.classList.remove('flick'), 1300);
+  }
+
+  if(view === 'agenda') renderAgenda();
+  if(view === 'novo')   renderForm(data || null, state.selDate);
+  if(view === 'ordens') renderOrdens();
+  if(view === 'ajustes') renderAjustes();
+  window.scrollTo(0, 0);
+}
+
+/* ==================== EVENTOS ==================== */
+
+document.addEventListener('click', e => {
+  const t = e.target;
+
+  // Seletor no estilo do app
+  const tog = t.closest('[data-toggle]');
+  if(tog){
+    const w = document.getElementById('w_' + tog.dataset.toggle);
+    if(w.dataset.kind === 'brand' || w.dataset.kind === 'model') renderSearchList(tog.dataset.toggle);
+    if(w.dataset.kind === 'wheel') initWheel(tog.dataset.toggle);
+    document.querySelectorAll('.sel.open').forEach(s => { if(s !== w) s.classList.remove('open'); });
+    w.classList.toggle('open');
+    return;
+  }
+  const pick = t.closest('[data-pick]');
+  if(pick){
+    const id = pick.dataset.pick;
+    document.getElementById(id).value = pick.dataset.val;
+    const w = document.getElementById('w_' + id);
+    const lab = w.querySelector('.sel-val');
+    lab.textContent = pick.dataset.label;
+    lab.classList.remove('ph');
+    w.querySelectorAll('.sel-opt').forEach(o => o.classList.toggle('on', o === pick));
+    if(id === 'f_brand') resetModel();
+    w.classList.remove('open');
+    return;
+  }
+  // Cadastrar marca ou modelo que ainda não existe na lista
+  const add = t.closest('[data-add]');
+  if(add){
+    const kind = add.dataset.add, id = add.dataset.target, val = add.dataset.val.trim();
+    if(kind === 'brand'){
+      if(!getBrands().some(b => norm(b) === norm(val))) catalog.brands.push(val);
+    } else {
+      const brand = document.getElementById('f_brand').value;
+      if(!getModels(brand).some(m => norm(m) === norm(val))){
+        catalog.models[brand] = catalog.models[brand] || [];
+        catalog.models[brand].push(val);
+      }
+    }
+    saveCatalog();
+    document.getElementById(id).value = val;
+    const w = document.getElementById('w_' + id);
+    const lab = w.querySelector('.sel-val');
+    lab.textContent = val; lab.classList.remove('ph');
+    w.classList.remove('open');
+    document.getElementById('s_' + id).value = '';
+    if(kind === 'brand') resetModel();
+    toast(`“${val}” cadastrado`);
+    return;
+  }
+
+  if(!t.closest('.sel')) document.querySelectorAll('.sel.open').forEach(s => s.classList.remove('open'));
+
+  const go = t.closest('[data-go]');
+  if(go){
+    if(go.dataset.go === 'novo'){ state.editId = null; }
+    if(go.dataset.go === 'ordens'){ state.dayFilter = null; state.ordemId = state.ordemId && state.orders.find(x => x.id === state.ordemId) ? state.ordemId : null; }
+    setView(go.dataset.go); return;
+  }
+
+  const cal = t.closest('[data-cal]');
+  if(cal){
+    const delta = Number(cal.dataset.cal);
+    if(delta === 0){ const n = new Date(); state.calMonth = [n.getFullYear(), n.getMonth()]; }
+    else{
+      let [y, m] = state.calMonth; m += delta;
+      if(m < 0){ m = 11; y--; } if(m > 11){ m = 0; y++; }
+      state.calMonth = [y, m];
+    }
+    renderAgenda(); return;
+  }
+
+  // Dia do calendário -> aba Ordens mostrando os serviços daquele dia
+  const day = t.closest('[data-day]');
+  if(day){
+    state.selDate = day.dataset.day;
+    state.dayFilter = day.dataset.day;
+    state.ordemId = null;
+    setView('ordens'); return;
+  }
+
+  const newday = t.closest('[data-newday]');
+  if(newday){ state.editId = null; renderForm(null, newday.dataset.newday); setView('novo'); return; }
+
+  const ord = t.closest('[data-order]');
+  if(ord){ state.ordemId = ord.dataset.order; setView('ordens'); return; }
+
+  const back = t.closest('[data-back]');
+  if(back){ state.ordemId = null; setView('ordens'); return; }
+
+  const rp = t.closest('[data-reopen]');
+  if(rp){ setStatus(rp.dataset.reopen, 'agendado'); return; }
+
+  const cd = t.closest('[data-clearday]');
+  if(cd){ state.dayFilter = null; renderOrdens(); return; }
+
+  const ed = t.closest('[data-edit]');
+  if(ed){ editOrder(ed.dataset.edit); return; }
+
+  const cn = t.closest('[data-cancel]');
+  if(cn){ cancelOrder(cn.dataset.cancel); return; }
+
+  const dl = t.closest('[data-delete]');
+  if(dl){ deleteOrder(dl.dataset.delete); return; }
+
+  if(t.id === 'btnExport') exportAgenda();
+  if(t.id === 'btnImport') $('#importFile').click();
+  if(t.id === 'btnClear') clearAll();
+});
+
+document.addEventListener('input', e => {
+  if(e.target.dataset && e.target.dataset.search){ renderSearchList(e.target.dataset.search); return; }
+  if(e.target.id === 'f_phone'){ e.target.value = formatPhone(e.target.value); return; }
+  if(e.target.id === 'a_mechs'){
+    state.mechanics = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
+    $('#mechs').innerHTML = state.mechanics.map(m => `<option value="${esc(m)}">`).join('');
+    saveState();
+  }
+});
+
+document.addEventListener('change', e => {
+  if(e.target.id === 'importFile' && e.target.files && e.target.files[0]){
+    importAgenda(e.target.files[0]); e.target.value = '';
+  }
+});
+
+/* ==================== INÍCIO ==================== */
+
+(function init(){
+  loadState();
+  loadCatalog();
+  startAgenda();
+  renderAgenda();
+  setInterval(() => { if(state.view === 'agenda') renderAgenda(); }, 60000);
+  setView('agenda');
+})();
+</script>
+
+</body></html>
