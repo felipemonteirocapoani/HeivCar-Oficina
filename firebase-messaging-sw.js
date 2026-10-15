@@ -16,18 +16,27 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage(payload => {
   const title = payload.data?.title || 'HeivCar Oficina';
   const body = payload.data?.body || '';
+  const orderId = payload.data?.orderId || '';
   self.registration.showNotification(title, {
     body,
-    icon: './icon-192.png',
-    badge: './icon-192.png',
-    tag: payload.data?.orderId || 'heivcar',
-    data: { url: './' }
+    tag: orderId || 'heivcar',
+    data: { orderId },
+    actions: [
+      { action: 'confirmar', title: 'Confirmar' },
+      { action: 'editar', title: 'Editar' }
+    ]
   });
 });
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  event.waitUntil(clients.openWindow(event.notification.data?.url || './'));
+  // "Confirmar" só fecha a notificação e o serviço continua como está
+  if (event.action === 'confirmar') return;
+  const orderId = event.notification.data?.orderId || '';
+  const url = event.action === 'editar'
+    ? `./?pedido=${encodeURIComponent(orderId)}&acao=editar`
+    : './';
+  event.waitUntil(clients.openWindow(url));
 });
 
 self.addEventListener('install', () => self.skipWaiting());
